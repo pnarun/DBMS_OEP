@@ -17,49 +17,43 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 
 public class ModifyFrame extends JFrame{
-	JPanel jp1,jp2;
-	JLabel lbl1ID,lbl2Name;
-	JTextField txtID,txtName;
+	
+	JLabel lbl1ID,Heading;
+	JTextField txtID;
 	JButton btnSave,btnBack;
 
 	ModifyFrame()
 	{
 	super("  Modify Employee  ");
-	setSize(500,500);
-	setResizable(false);    //the resize option is greyed out
+	setVisible(true);
+	setSize(1600,800);
+	setLayout(null);
+    setResizable(false);     //the resize option is greyed out
 
-	jp1=new JPanel();
-	jp1.setLayout(new FlowLayout());
-
+    Heading = new JLabel("ENTER    EMPLOYEE    ID    TO    MODIFY");
 	lbl1ID=new JLabel("ID");
-	txtID=new JTextField(3);//that is 3 coloumns
-
-	lbl2Name=new JLabel("Name");
-	txtName=new JTextField(10);//that is 10 coloumns
-
-	//now add all this to Jpane
-	jp1.add(lbl1ID);
-	jp1.add(txtID);
-	jp1.add(lbl2Name);
-	jp1.add(txtName);
-
-	//now add the pane to frame
-	add(jp1);
-
-	jp2=new JPanel();
-	jp2.setLayout(new FlowLayout());
-
-	//save and back buttons
-
+	txtID=new JTextField(10);
+	
 	btnSave=new JButton("Save");
 	btnBack=new JButton("Back");
+	
+	Heading.setSize(700,50);
+    Heading.setLocation(600,100);
+    lbl1ID.setSize(100,50);
+    lbl1ID.setLocation(450,200);
+    txtID.setSize(300,25);
+    txtID.setLocation(550,200);
+    btnSave.setSize(100,25);
+    btnSave.setLocation(500,700);
+    btnBack.setSize(100,25);
+    btnBack.setLocation(700,700);
+	add(Heading);
+	add(lbl1ID);
+	add(txtID);
+	
+	add(btnSave);
+	add(btnBack);
 
-	jp2.add(btnSave);
-	jp2.add(btnBack);
-
-	add(jp2,BorderLayout.SOUTH);
-	setLocationRelativeTo(null);   //SETS THE WHOLE FRAME AT CENTRE
-	setVisible(true);
 
 	//back button should take us back to homeframe
 	btnBack.addActionListener(new ActionListener(){
@@ -88,67 +82,81 @@ public class ModifyFrame extends JFrame{
 
 	public void actionPerformed(ActionEvent ae)
 	{
-	int id=0;
-	String name="";
+		String id="";
+		String name="";
+		String subid = "";
+		String dept = "";
+		
+		//id validation
+		try
+		{
 
-	//id validation
-	try
-	{
-	id=Integer.parseInt(txtID.getText());
-	}//end try
-	catch(NumberFormatException e)
-	{
-	JOptionPane.showMessageDialog(new JDialog()," Invalid id ");
-	//gets the focus back to id feild
-	txtID.setText("");
-	txtID.requestFocus();
-	return;
-	}//end catch
+			id = txtID.getText();
+			//id validation.
+			if(id==""){
+				JOptionPane.showMessageDialog(new JDialog()," Invalid id.ID should not be EMPTY.");
+				txtID.setText("");
+				txtID.requestFocus();
+				return;
+			}
+		
+			
+			subid = id.substring(0, 3);
+			
+			if(subid.equals("1DE"))
+				dept = "DEVELOPMENT";
+			else if(subid.equals("1RE"))
+				dept = "RESEARCH";
+			else if(subid.equals("1TE"))
+				dept = "TESTING";
+			
+			else
+			{
+				JOptionPane.showMessageDialog(new JDialog()," Invalid id.\n Please enter valid ID.");
+				//gets the focus back to id feild
+				txtID.setText("");
+				txtID.requestFocus();
+				return;
+			}
+			JOptionPane.showMessageDialog(new JDialog(),"The employee with id "+id+" belongs to "+dept+" Department");
+		}//end try
+		catch(NumberFormatException e)
+		{
+			JOptionPane.showMessageDialog(new JDialog()," Invalid id ");
+			//gets the focus back to id feild
+			txtID.setText("");
+			txtID.requestFocus();
+			return;
+		}//end catch
+	
+	
+		DatabaseHandler query =new DatabaseHandler();
+		String str[] = new String[4];
+		str = query.search(id,dept,0);
+		if(isEmptyStringArray(str))
+		{
+			new ModifyFrame();
+			dispose();
+		}
+		else
+		{
+			txtID.setText("");
+			new ModifyTableFrame(str,id);
+			dispose();
+		}
+		}
+	
+		});//end of btnsave actionhandler
 
-	//id validation.id less than 0
-	if(id<=0){
-	JOptionPane.showMessageDialog(new JDialog()," Invalid id.ID should be greater than 0 ");
-	txtID.setText("");
-	txtID.requestFocus();
-	return;
 	}
-
-	name=txtName.getText();
-
-	//name validation
-	if(name.length()==0)
+	public boolean isEmptyStringArray(String[] array)
 	{
-	JOptionPane.showMessageDialog(new JDialog()," Invalid name.Enter name ");
-	txtName.setText("");
-	txtName.requestFocus();
-	return;
-	}
-
-	try
-	{
-	if(!name.matches("[a-zA-Z0-9_.-]{3,}"))
-	{
-	JOptionPane.showMessageDialog(new JDialog()," Invalid name. ");
-	txtName.setText("");
-	txtName.requestFocus();
-	return;
-	}
-
-	}//end try
-	catch(PatternSyntaxException pse)
-	{
-	}
-
-	DatabaseHandler query =new DatabaseHandler();
-	query.modify(id,name);
-	txtID.setText("");
-	txtName.setText("");
-
-
-	}
-
-	});//end of btnsave actionhandler
-
+		for(int i = 0;i<array.length;i++)
+		{
+			if(array[i]!=null)
+				return false;
+		}
+		return true;
 	}
 
 }

@@ -1,7 +1,5 @@
 package OE.PROJECT;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -11,46 +9,38 @@ import java.util.regex.PatternSyntaxException;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-public class AddFrame extends JFrame{
+public class ModifyTableFrame extends JFrame{
 	
-    JLabel lbl1fname,lbl2sname,lbl3Gender,lbl4DOB,DepartmentSelection,Heading;
+	JLabel lbl1fname,lbl2sname,lbl3Gender,lbl4DOB,Heading;
     JTextField txtfname,txtsname,txtGender,txtDOB;
     JButton btnSave,btnBack;
-    JRadioButton d1, d2, d3;
-    ButtonGroup G;
-
-    AddFrame()
-    {
-        super("  Add Employee  ");
-        setVisible(true);
+    JLabel title = new JLabel("YOUR    UPDATE    WILL    REFLECT    IN    DATABASE");;
+    
+	ModifyTableFrame(String str[],String id)
+	{
+		super("  Modify Frame  ");
+		setVisible(true);
         setSize(1600,800);
     	setLayout(null);
         setResizable(false);    
-        d1 = new JRadioButton();
-        d2 = new JRadioButton();
-        d3 = new JRadioButton();
-        d1.setText("Development");
-        d2.setText("Research");
-        d3.setText("Testing");
         
-        DepartmentSelection = new JLabel("SELECT   DEPARTMENT");
-        Heading = new JLabel("INSERT   EMPLOYEE   DETAILS");
         
-        G = new ButtonGroup();
+        
+        Heading = new JLabel("UPDATE   EMPLOYEE   DETAILS");
+        
         
         lbl1fname=new JLabel("NAME");
-        txtfname=new JTextField(10);
+        txtfname=new JTextField(str[1],20);
         lbl3Gender=new JLabel("Gender");
-        txtGender=new JTextField(10);
+        txtGender=new JTextField(str[2],20);
         lbl4DOB=new JLabel("Date Of Birth");
-        txtDOB=new JTextField(10);
+        txtDOB=new JTextField(str[3],20);
         btnSave=new JButton("Save");
         btnBack=new JButton("Back");
         
@@ -72,14 +62,7 @@ public class AddFrame extends JFrame{
         btnSave.setLocation(500,700);
         btnBack.setSize(100,25);
         btnBack.setLocation(700,700);
-        DepartmentSelection.setSize(300,50);
-        DepartmentSelection.setLocation(500,400);
-        d1.setSize(100,50);
-        d1.setLocation(500,450);
-        d2.setSize(100,50);
-        d2.setLocation(500,500);
-        d3.setSize(100,50);
-        d3.setLocation(500,550);
+        
         
         add(Heading);
         add(lbl1fname);
@@ -88,16 +71,11 @@ public class AddFrame extends JFrame{
         add(txtGender);
         add(lbl4DOB);
         add(txtDOB);
-        add(DepartmentSelection);
-        add(d1);
-        add(d2);
-        add(d3);
+       
         add(btnSave);
         add(btnBack);
         
-        G.add(d1);
-        G.add(d2);
-        G.add(d3);
+        
         
         //back button should take us back to homeframe
         btnBack.addActionListener(new ActionListener(){
@@ -126,12 +104,14 @@ public class AddFrame extends JFrame{
 
             public void actionPerformed(ActionEvent ae)
             {
-            	String fname="";
+            	String dept = "";
+                String fname="";
                 String gender="";
                 String dateofbirth="";
-            	String dept = "";
             	
-            	
+                
+                String empid = id;
+                
                 
                 fname=txtfname.getText();
 
@@ -216,53 +196,34 @@ public class AddFrame extends JFrame{
                 	JOptionPane.showMessageDialog(new JDialog()," Pattern Syntax Exception in dateofbirth. ");
                 }
                 
-                if(d1.isSelected())
-            		dept = "DEVELOPMENT";
-            	else if(d2.isSelected())
-            		dept = "RESEARCH";
-            	else if(d3.isSelected())
-            		dept = "TESTING";
-            	
-            	if(dept=="")
-            	{
-            		JOptionPane.showMessageDialog(new JDialog()," Please select the Department. ");
-            		return;
-            	}
-            	else
-            	{
-            		JOptionPane.showMessageDialog(new JDialog()," You have selected "+dept+" as Department.");
-            	}
-            	
+                String subid = id.substring(0, 3);
+    			
+    			if(subid.equals("1DE"))
+    				dept = "DEVELOPMENT";
+    			else if(subid.equals("1RE"))
+    				dept = "RESEARCH";
+    			else if(subid.equals("1TE"))
+    				dept = "TESTING";
                 
+                //JOptionPane.showMessageDialog(new JDialog(),"Before modify1\n"+empid+"\n"+fname+"\n"+gender+"\n"+dateofbirth+"\n"+dept);
                 
-                String empid = "";
-                if(dept.equals("DEVELOPMENT"))
-                	empid = empid + "1DE";
-                else if(dept.equals("RESEARCH"))
-                	empid = empid + "1RE";
-                else 
-                	empid = empid + "1TE";
-                
-                DatabaseHandler query1 =new DatabaseHandler();
-                
-                String deptID = query1.getDepartmentCount(dept,0);
-                
-                empid = empid + deptID;
-                
-                
-                String str = "Welcome to AH Company.\n"+empid+" is your ID and please not it for further use.";
-                JOptionPane.showMessageDialog(new JDialog(),str);
                 DatabaseHandler query =new DatabaseHandler();
-                query.insert(empid,fname,gender,dateofbirth,dept);
+                if(dept.equals("DEVELOPMENT"))
+                	query.modifyd(empid,fname,gender,dateofbirth,dept);
+                else if(dept.equals("RESEARCH"))
+                	query.modifyr(empid,fname,gender,dateofbirth,dept);
+                else
+                	query.modifyt(empid,fname,gender,dateofbirth,dept);
+                	
                 txtfname.setText("");
                 txtGender.setText("");
                 txtDOB.setText("");
-                G.clearSelection();
-
+                new HomeFrame();
+                dispose();
 
             }
 
         });//end of btnsave actionhandler
 
-    }
+	}
 }
